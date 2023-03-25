@@ -1,7 +1,6 @@
 package com.sm.iam.dto.response;
 
 import lombok.*;
-import lombok.experimental.Accessors;
 
 @Builder
 @Getter

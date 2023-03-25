@@ -2,7 +2,6 @@ package com.sm.iam.dto.request;
 
 import com.sm.iam.entity.Role;
 import lombok.*;
-import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collection;

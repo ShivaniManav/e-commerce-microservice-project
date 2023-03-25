@@ -1,7 +1,6 @@
 package com.sm.iam.dto.request;
 
 import lombok.*;
-import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotNull;
 
