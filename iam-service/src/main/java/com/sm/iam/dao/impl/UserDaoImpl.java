@@ -8,18 +8,19 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 @Repository
 public class UserDaoImpl implements UserDao {
-	
-	@Autowired
-	SessionFactory sessionFactory;
+
+	@PersistenceContext(unitName = "iamPersistanceUnit")
+	private EntityManager entityManager;
 
 	@Override
 	public User findByUserName(String userName) {
-		Session session = sessionFactory.getCurrentSession();
-		Query query = session.createQuery("from User where username=:uName", User.class);
+		Query query = entityManager.createQuery("from User where username=:uName", User.class);
 		query.setParameter("uName", userName);
 		User user = null;
 		try {
@@ -34,8 +35,7 @@ public class UserDaoImpl implements UserDao {
 
 	@Override
 	public User findByEmail(String email) {
-		Session session = sessionFactory.getCurrentSession();
-		Query query = session.createQuery("from User where email=:uEmail", User.class);
+		Query query = entityManager.createQuery("from User where email=:uEmail", User.class);
 		query.setParameter("uEmail", email);
 		User user = null;
 		try {
@@ -48,8 +48,7 @@ public class UserDaoImpl implements UserDao {
 
 	@Override
 	public void save(User user) {
-		Session session = sessionFactory.getCurrentSession();
-		session.saveOrUpdate(user);
+		entityManager.persist(user);
 	}
 	
 }

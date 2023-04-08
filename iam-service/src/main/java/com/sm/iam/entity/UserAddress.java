@@ -49,7 +49,7 @@ public class UserAddress implements Serializable {
 	private String country;
 	
 	@Column(name = "is_default")
-	private int isDefault;
+	private boolean isDefault;
 	
 	// @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
 	// @JoinColumn(name = "fk_user_id")

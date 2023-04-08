@@ -43,7 +43,7 @@ public class User implements Serializable {
 	private String mobile;
 	
 	@Column(name = "active")
-	private int active;
+	private boolean active;
 	
 	@Column(name = "created_at")
 	@Temporal(TemporalType.TIMESTAMP)

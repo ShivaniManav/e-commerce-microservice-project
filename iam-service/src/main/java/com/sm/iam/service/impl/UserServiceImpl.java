@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
 
+	private static final String IAM_TXN = "iamTransactionManager";
+
 	@Autowired
 	private UserDao userDao;
 	
@@ -35,7 +37,7 @@ public class UserServiceImpl implements UserService {
 	private BCryptPasswordEncoder passwordEncoder;
 	
 	@Override
-	@Transactional
+	@Transactional(IAM_TXN)
 	public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
 		User user = userDao.findByUserName(userName);
 		if (user == null) {
@@ -50,31 +52,31 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	@Transactional
+	@Transactional(IAM_TXN)
 	public User findByUserName(String userName) {
 		return userDao.findByUserName(userName);
 	}
 
 	@Override
-	@Transactional
+	@Transactional(IAM_TXN)
 	public User findByEmail(String email) {
 		return userDao.findByEmail(email);
 	}
 
 	@Override
-	@Transactional
+	@Transactional(IAM_TXN)
 	public void updateDefaultAddress(int userId, int addrId) {
 		userAddressDao.updateDefaultAddress(userId, addrId);
 	}
 
 	@Override
-	@Transactional
+	@Transactional(IAM_TXN)
 	public void save(User user) {
 		userDao.save(user);
 	}
 
 	@Override
-	@Transactional
+	@Transactional(IAM_TXN)
 	public void saveUserAddress(UserAddress userAddress) {
 		userAddressDao.save(userAddress);
 	}

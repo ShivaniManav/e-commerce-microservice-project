@@ -15,6 +15,7 @@
 
     <modules>
         <module>sm-service-core</module>
+        <module>sm-data</module>
     </modules>
 
     <dependencyManagement>
@@ -22,6 +23,11 @@
             <dependency>
                 <groupId>com.sm</groupId>
                 <artifactId>sm-service-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sm</groupId>
+                <artifactId>sm-data</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

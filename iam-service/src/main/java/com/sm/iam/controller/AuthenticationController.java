@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("auth")
+@RequestMapping("/auth")
 public class AuthenticationController {
 	
 	@Autowired
@@ -192,7 +192,7 @@ public class AuthenticationController {
 	public User createUserModelFromRequest(RegistrationRequest registrationRequest) {
 		return User.builder().username(registrationRequest.getUsername()).password(passwordEncoder.encode(registrationRequest.getPassword()))
 				.firstName(registrationRequest.getFirstName()).lastName(registrationRequest.getLastName()).email(registrationRequest.getEmail())
-				.mobile(registrationRequest.getMobile()).roles(registrationRequest.getRoles()).active(1).createdAt(new Date())
+				.mobile(registrationRequest.getMobile()).roles(registrationRequest.getRoles()).active(true).createdAt(new Date())
 				.modifiedAt(new Date()).build();
 	}
 	

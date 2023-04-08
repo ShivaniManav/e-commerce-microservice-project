@@ -20,9 +20,13 @@
     <java.version>1.8</java.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
+    <mysql.connector.version>8.0.27</mysql.connector.version>
     <jwt.version>0.11.2</jwt.version>
     <jackson.version>2.12.5</jackson.version>
     <spring-cloud.version>2021.0.6</spring-cloud.version>
+    <servlet.version>3.1.0</servlet.version>
+    <servlet.jsp.version>2.3.1</servlet.jsp.version>
+    <servlet.jstl.version>1.2</servlet.jstl.version>
     <junit.jupiter.version>5.9.1</junit.jupiter.version>
     <junit.platform.version>1.9.1</junit.platform.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -37,6 +41,30 @@
         <version>${spring-cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+
+      <!-- MySQL -->
+      <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <version>${mysql.connector.version}</version>
+      </dependency>
+
+      <!--  Servlet+JSP+JSTL  -->
+      <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>
+        <version>${servlet.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.servlet.jsp</groupId>
+        <artifactId>javax.servlet.jsp-api</artifactId>
+        <version>${servlet.jsp.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>jstl</artifactId>
+        <version>${servlet.jstl.version}</version>
       </dependency>
 
       <!-- Add Jackson for JSON converters -->
