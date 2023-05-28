@@ -2,6 +2,7 @@ package com.sm.iam.dao.impl;
 
 import com.sm.iam.dao.TokenDao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -14,6 +15,7 @@ public class TokenDaoImpl implements TokenDao {
 	private static final String PWD_RESET_TOKEN_KEY_PREFIX = "sm::prt::";
 	
 	@Autowired
+	@Qualifier(value = "iamRedisTemplate")
 	RedisTemplate<String, Object> redisTemplate;
 
 	@Override

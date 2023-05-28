@@ -12,22 +12,26 @@ import com.sm.iam.service.TokenService;
 import com.sm.iam.service.UserService;
 import com.sm.iam.utils.CookieUtil;
 import com.sm.iam.utils.JWTUtil;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import net.bytebuddy.utility.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/auth")
@@ -35,9 +39,6 @@ public class AuthenticationController {
 	
 	@Autowired
 	private JWTUtil jwtUtil;
-	
-	@Autowired
-	private CookieUtil cookieUtil;
 	
 	@Autowired
 	private AuthenticationManager authenticationManager;
@@ -88,7 +89,7 @@ public class AuthenticationController {
 		final UserDetails userDetails = userService.loadUserByUsername(request.getUsername());
 		final String token = jwtUtil.generateToken(userDetails);
 		long maxAge = jwtUtil.getExpirationDateFromToken(token).getTime()/1000;
-		response.addHeader("Set-Cookie", cookieUtil.generateCookieForToken(token, maxAge));
+		response.addHeader("Set-Cookie", CookieUtil.generateCookieForToken(token, maxAge));
 		return new JwtAuthResponse(token);
 	}
 	
@@ -96,21 +97,41 @@ public class AuthenticationController {
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<?> logoutUser(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> responseEntityBody = new HashMap<>();
-		String token = cookieUtil.getAccessTokenFromCookie(request.getCookies());
+		String token = CookieUtil.getAccessTokenFromCookie(request.getCookies());
 		long ttl = (jwtUtil.getExpirationDateFromToken(token).getTime()/1000) - (new Date().getTime()/1000);
 		if(token != null) {
 			tokenService.addTokenInBlacklist(token, ttl);
 		}
-		response.addHeader("Set-Cookie", cookieUtil.generateCookieForToken(token, Long.parseLong("0")));
+		response.addHeader("Set-Cookie", CookieUtil.generateCookieForToken(token, Long.parseLong("0")));
 		responseEntityBody.put("message", "User logged out successfully!");
 		return new ResponseEntity<Map<String,Object>>(responseEntityBody, HttpStatus.OK);
+	}
+
+	@GetMapping("/validate")
+	public ResponseEntity<?> validateUser(HttpServletRequest request, HttpServletResponse response) {
+		String token = CookieUtil.getAccessTokenFromCookie(request.getCookies());
+		try {
+			Claims body = jwtUtil.getAllClaimsFromToken(token);
+			String username = body.getSubject();
+			List<Map<String, String>> authorities = (List<Map<String, String>>) body.get("authorities");
+			Set<SimpleGrantedAuthority> simpleGrantedAuthorities = authorities.stream()
+					.map(m -> new SimpleGrantedAuthority(m.get("authority")))
+					.collect(Collectors.toSet());
+			Authentication authentication = new UsernamePasswordAuthenticationToken(
+					username,
+					null,
+					simpleGrantedAuthorities);
+			return new ResponseEntity<>(Boolean.TRUE, HttpStatus.OK);
+		} catch (JwtException e) {
+			return new ResponseEntity<>(Boolean.FALSE, HttpStatus.UNAUTHORIZED);
+		}
 	}
 	
 	@PostMapping("/password-reset")
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<?> passwordReset(@RequestBody PasswordResetRequest passwordResetRequest, HttpServletRequest request) throws Exception {
 		Map<String, Object> responseEntityBody = new HashMap<>();
-		String token = cookieUtil.getAccessTokenFromCookie(request.getCookies());
+		String token = CookieUtil.getAccessTokenFromCookie(request.getCookies());
 		String username = jwtUtil.getUsernameFromToken(token);
 		User user = userService.findByUserName(username);
 		if(passwordEncoder.matches(passwordResetRequest.getOldPassword(), user.getPassword())) {

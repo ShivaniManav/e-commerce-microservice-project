@@ -2,10 +2,12 @@ package com.sm.core.data.config.db;
 
 public interface Vendors {
 
-    String MYSQL = "MYSQL";
+    String MYSQL = "mysql";
 
-    String POSTGRESQL = "POSTGRESQL";
+    String POSTGRESQL = "postgresql";
 
-    String MONGODB = "MONGODB";
+    String MONGODB = "mongodb";
+
+    String REDIS = "redis";
 
 }

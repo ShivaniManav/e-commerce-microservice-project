@@ -43,7 +43,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/auth/register").permitAll()
                 .antMatchers("/auth/login").permitAll()
-                .antMatchers("/welcome/hello").permitAll()
+                .antMatchers("/welcome/").permitAll()
                 .antMatchers("/auth/forgot-password-email").permitAll()
                 .antMatchers("/auth/validate-forgot-password-otp").permitAll()
                 .antMatchers("/auth/forgot-password").permitAll()

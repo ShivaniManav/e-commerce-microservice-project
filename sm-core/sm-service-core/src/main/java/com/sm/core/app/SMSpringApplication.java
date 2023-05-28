@@ -30,7 +30,7 @@ public abstract class SMSpringApplication extends SpringBootServletInitializer {
         applicationContext = SpringApplication.run(source, args);
     }
 
-    public ConfigurableApplicationContext getApplicationContext() {
+    public static ConfigurableApplicationContext getApplicationContext() {
         return applicationContext;
     }
 

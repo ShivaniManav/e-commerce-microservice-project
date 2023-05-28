@@ -2,6 +2,7 @@ package com.sm.iam.dao.impl;
 
 import com.sm.iam.dao.OtpDao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -12,8 +13,9 @@ import java.util.concurrent.TimeUnit;
 public class OtpDaoImpl implements OtpDao {
 
 	private static final String OTP_KEY_PREFIX = "sm::otp::";
-	
+
 	@Autowired
+	@Qualifier(value = "iamRedisTemplate")
 	private RedisTemplate<String, Object> redisTemplate;
 	
 	@Override

@@ -28,18 +28,17 @@ public class DataSourceBuilder {
 
     private String vendor;
 
-    public void buildDataSourceProps() {
-        dataSourceName = dataSourceName.toLowerCase();
-        vendor = vendor.toLowerCase();
-        DataSourceProps.loadDataSourceProps(dataSourceName, vendor);
-        driver = DataSourceProps.getStringProperty(dataSourceName, "mysql.datasource.driver-class-name");
-        jdbcUrl = DataSourceProps.getStringProperty(dataSourceName,"mysql.datasource.jdbcUrl");
-        username = DataSourceProps.getStringProperty(dataSourceName,"mysql.datasource.username");
-        password = DataSourceProps.getStringProperty(dataSourceName,"mysql.datasource.password");
+    public void buildDataSourceProps(String serviceName) {
+        DataSourceProps.loadDataSourceProps(serviceName, dataSourceName, vendor);
+        String rootKey = DataSourceProps.getRootKey(serviceName, dataSourceName, vendor);
+        driver = DataSourceProps.getStringProperty(rootKey, "mysql.datasource.driver-class-name");
+        jdbcUrl = DataSourceProps.getStringProperty(rootKey,"mysql.datasource.jdbcUrl");
+        username = DataSourceProps.getStringProperty(rootKey,"mysql.datasource.username");
+        password = DataSourceProps.getStringProperty(rootKey,"mysql.datasource.password");
     }
 
-    public DataSource buildDataSource() {
-        buildDataSourceProps();
+    public DataSource buildDataSource(String serviceName) {
+        buildDataSourceProps(serviceName);
         if(Objects.isNull(jdbcUrl)) {
             throw new IllegalStateException("jdbcUrl must be set");
         }

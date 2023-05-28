@@ -30,9 +30,6 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 	private JWTUtil jwtUtil;
 	
 	@Autowired
-	private CookieUtil cookieUtil;
-	
-	@Autowired
 	private TokenService tokenService;
 
 	@Override
@@ -54,7 +51,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 			filterChain.doFilter(request, response);
 			return;
 		}
-		String token = cookieUtil.getAccessTokenFromCookie(request.getCookies());
+		String token = CookieUtil.getAccessTokenFromCookie(request.getCookies());
 		if (token == null || token.equals("")) {
 			filterChain.doFilter(request, response);
 			return;

@@ -1,4 +1,4 @@
-package com.sm.iam.utils;
+package com.sm.core.util;
 
 import org.springframework.stereotype.Component;
 

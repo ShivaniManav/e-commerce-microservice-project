@@ -24,6 +24,8 @@ public abstract class SMBaseDBConfig {
 
     private String packagesToScan;
 
+    private String serviceName;
+
     private String dataSourceName;
 
     private String transactionManagerName;
@@ -44,18 +46,21 @@ public abstract class SMBaseDBConfig {
         this.setupPersistanceContext = false;
     }
 
-    public SMBaseDBConfig(String packagesToScan, String dataSourceType, String transactionManagerName, String persistanceUnitName, String vendor) {
+    public SMBaseDBConfig(String serviceName, String packagesToScan, String dataSourceName,
+                          String transactionManagerName, String persistenceUnitName, String vendor) {
+        this.serviceName = serviceName;
         this.packagesToScan = packagesToScan;
-        this.dataSourceName = dataSourceType;
+        this.dataSourceName = dataSourceName;
         this.transactionManagerName = transactionManagerName;
-        this.emfName = persistanceUnitName;
+        this.emfName = persistenceUnitName;
         this.vendor = vendor;
 
         this.setupPersistanceContext = true;
     }
 
     public DataSource createDataSource() {
-        return DataSourceBuilder.builder().vendor(vendor).dataSourceName(dataSourceName).build().buildDataSource();
+        return DataSourceBuilder.builder().vendor(vendor).dataSourceName(dataSourceName).build()
+                .buildDataSource(serviceName);
     }
 
     public BeanFactoryPostProcessor createPersistenceBean() {
@@ -63,23 +68,27 @@ public abstract class SMBaseDBConfig {
             BeanDefinitionRegistry registry = (BeanDefinitionRegistry) configurableListableBeanFactory;
             dataSourceBeanName = dataSourceBeanName == null ? dataSourceName + "_DATASOURCE" : dataSourceBeanName;
             registry.registerBeanDefinition(dataSourceBeanName,
-                    BeanDefinitionBuilder.genericBeanDefinition(DataSource.class, this::createDataSource).getBeanDefinition());
+                    BeanDefinitionBuilder
+                            .genericBeanDefinition(DataSource.class, this::createDataSource).getBeanDefinition());
             if(setupPersistanceContext) {
                 registry.registerBeanDefinition(emfName,
-                        BeanDefinitionBuilder.genericBeanDefinition(LocalContainerEntityManagerFactoryBean.class, () -> createEntityManagerFactory(packagesToScan))
+                        BeanDefinitionBuilder.genericBeanDefinition(LocalContainerEntityManagerFactoryBean.class,
+                                        () -> createEntityManagerFactory(packagesToScan))
                                 .addPropertyReference(DATA_SOURCE, dataSourceBeanName)
                                 .addDependsOn(dataSourceBeanName)
                                 .getBeanDefinition()
                 );
                 registry.registerBeanDefinition(transactionManagerName,
-                        BeanDefinitionBuilder.genericBeanDefinition(PlatformTransactionManager.class, this::jpaTransactionManager)
+                        BeanDefinitionBuilder.genericBeanDefinition(PlatformTransactionManager.class,
+                                        this::jpaTransactionManager)
                                 .addPropertyReference("entityManagerFactory", emfName)
                                 .addPropertyValue("persistenceUnitName", emfName)
                                 .getBeanDefinition()
                 );
             } else {
                 registry.registerBeanDefinition(DATA_SOURCE_TRANSACTION_MANAGER,
-                        BeanDefinitionBuilder.genericBeanDefinition(PlatformTransactionManager.class, this::dataSourceTransactionManager)
+                        BeanDefinitionBuilder.genericBeanDefinition(PlatformTransactionManager.class,
+                                        this::dataSourceTransactionManager)
                                 .addPropertyReference(DATA_SOURCE, DATA_SOURCE)
                                 .getBeanDefinition()
                 );

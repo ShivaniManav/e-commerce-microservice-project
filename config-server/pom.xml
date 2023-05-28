@@ -15,11 +15,6 @@
 	<name>configuration server</name>
 	<description>Common configuration server</description>
 
-	<properties>
-		<java.version>1.8</java.version>
-		<spring-cloud.version>2021.0.6</spring-cloud.version>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>com.sm</groupId>
@@ -30,8 +25,13 @@
 			<artifactId>sm-data</artifactId>
 		</dependency>
 		<dependency>
+
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-config-server</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
