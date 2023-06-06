@@ -1,13 +1,11 @@
 package com.sm.iam.filter;
 
 import com.sm.core.util.JWTUtil;
-import com.sm.iam.constants.Constants;
 import com.sm.iam.service.TokenService;
+import com.sm.iam.utils.CookieUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -36,12 +34,11 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request,
 			HttpServletResponse response,
 			FilterChain filterChain) throws ServletException, IOException {
-		String token = request.getHeader(HttpHeaders.AUTHORIZATION);
+		String token = CookieUtil.getAccessTokenFromCookie(request.getCookies());
 		if (token == null || token.equals("")) {
 			filterChain.doFilter(request, response);
 			return;
 		}
-		token = StringUtils.replace(token, Constants.BEARER, "");
 		if(tokenService.isTokenInBlacklist(token)) {
 			filterChain.doFilter(request, response);
 			return;

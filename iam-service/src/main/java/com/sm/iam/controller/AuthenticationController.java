@@ -2,6 +2,7 @@ package com.sm.iam.controller;
 
 
 import com.sm.core.util.JWTUtil;
+import com.sm.iam.dto.response.AuthenticationResponse;
 import com.sm.iam.entity.User;
 import com.sm.iam.dto.request.LoginRequest;
 import com.sm.iam.dto.request.PasswordResetRequest;
@@ -22,6 +23,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -72,55 +74,14 @@ public class AuthenticationController {
 		response.put("message", "User Registered Successfully");
 		return new ResponseEntity<Map<String,Object>>(response, HttpStatus.CREATED);
 	}
-	
-	@PostMapping("/login")
-	@ResponseStatus(HttpStatus.OK)
-	public JwtAuthResponse loginUser(@RequestBody LoginRequest request, HttpServletResponse response) throws Exception {
-		authenticationManager.authenticate(
-					new UsernamePasswordAuthenticationToken(
-							request.getUsername(),
-							request.getPassword()
-						)
-					);
-		final UserDetails userDetails = userService.loadUserByUsername(request.getUsername());
-		final String token = jwtUtil.generateToken(userDetails.getUsername(), userDetails.getAuthorities());
-		long maxAge = jwtUtil.getExpirationDateFromToken(token).getTime()/1000;
-		response.addHeader("Set-Cookie", CookieUtil.generateCookieForToken(token, maxAge));
-		return new JwtAuthResponse(token);
-	}
-	
-	@PostMapping("/logout")
-	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<?> logoutUser(HttpServletRequest request, HttpServletResponse response) {
-		Map<String, Object> responseEntityBody = new HashMap<>();
-		String token = CookieUtil.getAccessTokenFromCookie(request.getCookies());
-		long ttl = (jwtUtil.getExpirationDateFromToken(token).getTime()/1000) - (new Date().getTime()/1000);
-		if(token != null) {
-			tokenService.addTokenInBlacklist(token, ttl);
-		}
-		response.addHeader("Set-Cookie", CookieUtil.generateCookieForToken(token, Long.parseLong("0")));
-		responseEntityBody.put("message", "User logged out successfully!");
-		return new ResponseEntity<Map<String,Object>>(responseEntityBody, HttpStatus.OK);
-	}
 
 	@GetMapping("/validate")
-	public ResponseEntity<?> validateUser(HttpServletRequest request, HttpServletResponse response) {
-		String token = CookieUtil.getAccessTokenFromCookie(request.getCookies());
-		try {
-			Claims body = jwtUtil.getAllClaimsFromToken(token);
-			String username = body.getSubject();
-			List<Map<String, String>> authorities = (List<Map<String, String>>) body.get("authorities");
-			Set<SimpleGrantedAuthority> simpleGrantedAuthorities = authorities.stream()
-					.map(m -> new SimpleGrantedAuthority(m.get("authority")))
-					.collect(Collectors.toSet());
-			Authentication authentication = new UsernamePasswordAuthenticationToken(
-					username,
-					null,
-					simpleGrantedAuthorities);
-			return new ResponseEntity<>(Boolean.TRUE, HttpStatus.OK);
-		} catch (JwtException e) {
-			return new ResponseEntity<>(Boolean.FALSE, HttpStatus.UNAUTHORIZED);
-		}
+	public ResponseEntity<AuthenticationResponse> validateUser(HttpServletRequest request, HttpServletResponse response) {
+		String username = (String) request.getAttribute("username");
+		List<GrantedAuthority> simpleGrantedAuthorities =
+				(List<GrantedAuthority>) request.getAttribute("authorities");
+		return ResponseEntity.ok(AuthenticationResponse.builder().status(HttpStatus.OK.getReasonPhrase())
+				.username(username).authorities(simpleGrantedAuthorities).isAuthenticated(true).build());
 	}
 	
 	@PostMapping("/password-reset")

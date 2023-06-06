@@ -1,7 +1,8 @@
-package com.sm.iam.dto.response;
+package com.sm.gateway.dto;
 
-import lombok.*;
-import org.springframework.security.core.GrantedAuthority;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public class AuthenticationResponse {
 
     private String token;
 
-    private List<? extends GrantedAuthority> authorities;
+    private List<Authority> authorities;
 
     private boolean isAuthenticated;
 }
