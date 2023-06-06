@@ -1,16 +1,17 @@
 package com.sm.iam.filter;
 
+import com.sm.core.util.JWTUtil;
+import com.sm.iam.constants.Constants;
 import com.sm.iam.service.TokenService;
-import com.sm.iam.utils.CookieUtil;
-import com.sm.iam.utils.JWTUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -23,39 +24,24 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Component
+@RequiredArgsConstructor
 public class JwtTokenVerifier extends OncePerRequestFilter {
 
-	@Autowired
-	private JWTUtil jwtUtil;
-	
-	@Autowired
-	private TokenService tokenService;
+	private final TokenService tokenService;
+
+	private final JWTUtil jwtUtil;
 
 	@Override
 	@SuppressWarnings("unchecked")
 	protected void doFilterInternal(HttpServletRequest request,
 			HttpServletResponse response,
 			FilterChain filterChain) throws ServletException, IOException {
-		// String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-		//
-		// if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer
-		// ")) {
-		// filterChain.doFilter(request, response);
-		// return;
-		// }
-		//
-		// String token = authorizationHeader.replace("Bearer ", "");}
-		String path = request.getServletPath();
-		if(path.equals("/auth/login") || path.equals("/auth/register") || path.equals("/auth/forgot-password-email") || path.equals("/auth/validate-forgot-password-otp") || path.equals("/auth/forgot-password")) {
-			filterChain.doFilter(request, response);
-			return;
-		}
-		String token = CookieUtil.getAccessTokenFromCookie(request.getCookies());
+		String token = request.getHeader(HttpHeaders.AUTHORIZATION);
 		if (token == null || token.equals("")) {
 			filterChain.doFilter(request, response);
 			return;
 		}
+		token = StringUtils.replace(token, Constants.BEARER, "");
 		if(tokenService.isTokenInBlacklist(token)) {
 			filterChain.doFilter(request, response);
 			return;
@@ -72,6 +58,8 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 					null,
 					simpleGrantedAuthorities);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
+			request.setAttribute("username", username);
+			request.setAttribute("authorities", simpleGrantedAuthorities);
 		} catch (JwtException e) {
 			throw new IllegalStateException(String.format("Token %s cannot be trusted", token));
 		}

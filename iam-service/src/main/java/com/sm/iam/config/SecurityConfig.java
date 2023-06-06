@@ -1,6 +1,10 @@
 package com.sm.iam.config;
 
+import com.sm.core.util.JWTUtil;
 import com.sm.iam.filter.JwtTokenVerifier;
+import com.sm.iam.filter.JwtUsernameAndPasswordAuthenticationFilter;
+import com.sm.iam.handler.JwtLogoutSuccessHandler;
+import com.sm.iam.service.TokenService;
 import com.sm.iam.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +27,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private UserService userService;
 
     @Autowired
-    private JwtTokenVerifier jwtTokenVerifier;
+    private TokenService tokenService;
+
+    @Autowired
+    private JWTUtil jwtUtil;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -38,8 +45,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf()
-                .disable()
+        http.csrf().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManagerBean(), jwtUtil))
+                .addFilterAfter(new JwtTokenVerifier(tokenService, jwtUtil), JwtUsernameAndPasswordAuthenticationFilter.class)
                 .authorizeRequests()
                 .antMatchers("/auth/register").permitAll()
                 .antMatchers("/auth/login").permitAll()
@@ -49,11 +59,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/auth/forgot-password").permitAll()
                 .anyRequest()
                 .authenticated()
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.addFilterBefore(jwtTokenVerifier, UsernamePasswordAuthenticationFilter.class);
-        http.cors();
+                .and().cors();
+        //logout success handler for blacklisting jwt token
+        http.logout()
+                .logoutSuccessHandler(new JwtLogoutSuccessHandler(tokenService, jwtUtil)).permitAll();
     }
 
     @Bean

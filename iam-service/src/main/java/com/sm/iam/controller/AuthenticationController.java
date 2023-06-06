@@ -1,6 +1,7 @@
 package com.sm.iam.controller;
 
 
+import com.sm.core.util.JWTUtil;
 import com.sm.iam.entity.User;
 import com.sm.iam.dto.request.LoginRequest;
 import com.sm.iam.dto.request.PasswordResetRequest;
@@ -11,7 +12,6 @@ import com.sm.iam.service.OtpService;
 import com.sm.iam.service.TokenService;
 import com.sm.iam.service.UserService;
 import com.sm.iam.utils.CookieUtil;
-import com.sm.iam.utils.JWTUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import net.bytebuddy.utility.RandomString;
@@ -76,18 +76,14 @@ public class AuthenticationController {
 	@PostMapping("/login")
 	@ResponseStatus(HttpStatus.OK)
 	public JwtAuthResponse loginUser(@RequestBody LoginRequest request, HttpServletResponse response) throws Exception {
-		try {
-			authenticationManager.authenticate(
-						new UsernamePasswordAuthenticationToken(
-								request.getUsername(),
-								request.getPassword()
-							)
-						);
-		} catch (AuthenticationException e) {
-			throw e;
-		}
+		authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(
+							request.getUsername(),
+							request.getPassword()
+						)
+					);
 		final UserDetails userDetails = userService.loadUserByUsername(request.getUsername());
-		final String token = jwtUtil.generateToken(userDetails);
+		final String token = jwtUtil.generateToken(userDetails.getUsername(), userDetails.getAuthorities());
 		long maxAge = jwtUtil.getExpirationDateFromToken(token).getTime()/1000;
 		response.addHeader("Set-Cookie", CookieUtil.generateCookieForToken(token, maxAge));
 		return new JwtAuthResponse(token);

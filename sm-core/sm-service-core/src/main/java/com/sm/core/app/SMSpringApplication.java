@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Bean;
 
 import java.util.Objects;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.sm.core.*"})
 public abstract class SMSpringApplication extends SpringBootServletInitializer {
 
     private static String CONTEXT_PATH = "/";

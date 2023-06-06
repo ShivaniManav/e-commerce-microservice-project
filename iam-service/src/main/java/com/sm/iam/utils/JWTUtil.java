@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-@Component
+//@Component
 @PropertySource({"classpath:jwt.properties"})
 public class JWTUtil implements Serializable {
 
