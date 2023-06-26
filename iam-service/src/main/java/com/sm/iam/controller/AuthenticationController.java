@@ -75,7 +75,7 @@ public class AuthenticationController {
 		return new ResponseEntity<Map<String,Object>>(response, HttpStatus.CREATED);
 	}
 
-	@GetMapping("/validate")
+	@PostMapping("/validate")
 	public ResponseEntity<AuthenticationResponse> validateUser(HttpServletRequest request, HttpServletResponse response) {
 		String username = (String) request.getAttribute("username");
 		List<GrantedAuthority> simpleGrantedAuthorities =

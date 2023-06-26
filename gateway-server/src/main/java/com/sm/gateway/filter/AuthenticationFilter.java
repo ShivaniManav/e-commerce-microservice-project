@@ -43,17 +43,18 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                 String token = exchange.getRequest().getCookies().get(ACCESS_TOKEN).toString();
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("Cookie", ACCESS_TOKEN + "=" + token);
-                AuthenticationResponse authResponse = restTemplate.exchange("http://iam-service/iam/auth/validate",
-                        HttpMethod.GET, new HttpEntity<>(headers), AuthenticationResponse.class).getBody();
-                assert authResponse != null;
-                if (!authResponse.isAuthenticated()) {
-                    throw new SMServiceException("Invalid token provided");
+                try {
+                    AuthenticationResponse authResponse = restTemplate.exchange("lb://iam-service/iam/auth/validate",
+                            HttpMethod.POST, new HttpEntity<>(headers), AuthenticationResponse.class).getBody();
+                    assert authResponse != null;
+                    exchange.getRequest().mutate().header("username", authResponse.getUsername())
+                            .build();
+                    exchange.getRequest().mutate().header("authorities", authResponse.getAuthorities().stream()
+                            .map(Authority::getRole).collect(Collectors.joining(","))).build();
+                    exchange.getRequest().mutate().header("access_token", authResponse.getToken()).build();
+                } catch(Exception e) {
+
                 }
-                exchange.getRequest().mutate().header("username", authResponse.getUsername())
-                        .build();
-                exchange.getRequest().mutate().header("authorities", authResponse.getAuthorities().stream()
-                        .map(Authority::getRole).collect(Collectors.joining(","))).build();
-                exchange.getRequest().mutate().header("access_token", authResponse.getToken()).build();
             }
             return chain.filter(exchange);
         });
