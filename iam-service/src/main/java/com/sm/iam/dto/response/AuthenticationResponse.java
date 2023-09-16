@@ -3,7 +3,7 @@ package com.sm.iam.dto.response;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 
-import java.util.List;
+import java.util.Set;
 
 @Builder
 @Getter
@@ -16,7 +16,7 @@ public class AuthenticationResponse {
 
     private String token;
 
-    private List<? extends GrantedAuthority> authorities;
+    private Set<GrantedAuthority> authorities;
 
     private boolean isAuthenticated;
 }

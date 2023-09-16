@@ -10,7 +10,8 @@ import org.springframework.context.annotation.Configuration;
 public class DataSourceConfig extends SMBaseDBConfig {
 
     public DataSourceConfig() {
-        super("iam", "com.sm.iam", "sm_iam", "iamTransactionManager", "iamPersistanceUnit", Vendors.MYSQL);
+        super("iam", "com.sm.iam", "sm_iam", "iamTransactionManager",
+                "iamPersistanceUnit", Vendors.MYSQL);
     }
 
     @Bean

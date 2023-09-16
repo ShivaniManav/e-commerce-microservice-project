@@ -1,39 +1,29 @@
 package com.sm.iam.controller;
 
 
+import com.sm.core.exception.SMServiceException;
+import com.sm.core.util.CookieUtil;
 import com.sm.core.util.JWTUtil;
 import com.sm.iam.dto.response.AuthenticationResponse;
 import com.sm.iam.entity.User;
-import com.sm.iam.dto.request.LoginRequest;
 import com.sm.iam.dto.request.PasswordResetRequest;
 import com.sm.iam.dto.request.RegistrationRequest;
-import com.sm.iam.dto.response.JwtAuthResponse;
 import com.sm.iam.service.MailService;
 import com.sm.iam.service.OtpService;
 import com.sm.iam.service.TokenService;
 import com.sm.iam.service.UserService;
-import com.sm.iam.utils.CookieUtil;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import net.bytebuddy.utility.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/auth")
@@ -69,17 +59,17 @@ public class AuthenticationController {
 			User user = createUserModelFromRequest(registrationRequest);
 			userService.save(user);
 		} catch (Exception e) {
-			throw new Exception("REGISTRATION FAILED");
+			throw new SMServiceException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
 		}
 		response.put("message", "User Registered Successfully");
-		return new ResponseEntity<Map<String,Object>>(response, HttpStatus.CREATED);
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
 	@PostMapping("/validate")
 	public ResponseEntity<AuthenticationResponse> validateUser(HttpServletRequest request, HttpServletResponse response) {
 		String username = (String) request.getAttribute("username");
-		List<GrantedAuthority> simpleGrantedAuthorities =
-				(List<GrantedAuthority>) request.getAttribute("authorities");
+		Set<GrantedAuthority> simpleGrantedAuthorities =
+				(Set<GrantedAuthority>) request.getAttribute("authorities");
 		return ResponseEntity.ok(AuthenticationResponse.builder().status(HttpStatus.OK.getReasonPhrase())
 				.username(username).authorities(simpleGrantedAuthorities).isAuthenticated(true).build());
 	}
@@ -102,13 +92,7 @@ public class AuthenticationController {
 		}
 		userService.save(user);
 		responseEntityBody.put("message", "Password has been resetted successfully for " + user.getUsername());
-		return new ResponseEntity<Map<String,Object>>(responseEntityBody, HttpStatus.OK);
-	}
-	
-	@GetMapping("/mail")
-	@ResponseStatus(HttpStatus.OK)
-	public void sendMail() {
-		mailService.sendSimpleMessage();
+		return new ResponseEntity<>(responseEntityBody, HttpStatus.OK);
 	}
 	
 	@GetMapping("/forgot-password-email")
@@ -129,10 +113,10 @@ public class AuthenticationController {
 		Map<String, Object> response = new HashMap<>();
 		String clientOtp = String.valueOf(request.get("otp"));
 		String serverOtp = null;
-		if(clientOtp != null && !clientOtp.equals("")) {
+		if(Objects.nonNull(clientOtp) && !clientOtp.isEmpty()) {
 			serverOtp = otpService.getOTP(request.get("email"), clientOtp);
 		}
-		if(serverOtp == null) {
+		if(Objects.isNull(serverOtp)) {
 			throw new Exception("Invalid OTP!");
 		}
 		otpService.invalidateOTP(request.get("email"), clientOtp);
@@ -140,14 +124,13 @@ public class AuthenticationController {
 		tokenService.generatePasswordResetToken(request.get("email"), passwordResetToken);
 		response.put("isOtpValid", true);
 		response.put("passwordResetToken", passwordResetToken);
-		return new ResponseEntity<Map<String,Object>>(response, HttpStatus.OK);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
 	@PostMapping("/forgot-password")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<?> processForgotPassword(@RequestBody Map<String, String> request, 
 					@RequestParam(name = "passwordResetToken") String passwordResetToken) throws Exception {
-		User user = null;
 		Map<String, Object> response = new HashMap<>();
 		String newPwd = request.get("newPassword");
 		String confNewPwd = request.get("confirmNewPassword");
@@ -156,21 +139,23 @@ public class AuthenticationController {
 			throw new Exception("Invalid Password Reset Token!");
 		}
 		if(newPwd.equals(confNewPwd)) {
-			user = userService.findByEmail(email);
+			User user = userService.findByEmail(email);
 			user.setPassword(passwordEncoder.encode(newPwd));
 			userService.save(user);
 			tokenService.deletePasswordResetToken(passwordResetToken);
-			response.put("message", "Password has been resetted successfully for " + user.getUsername());
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+			response.put("message", "Password was reset successfully for " + user.getUsername());
+			return new ResponseEntity<>(response, HttpStatus.OK);
 		} else {
 			throw new Exception("Both password fields must match!");
 		}
 	}
 	
 	public User createUserModelFromRequest(RegistrationRequest registrationRequest) {
-		return User.builder().username(registrationRequest.getUsername()).password(passwordEncoder.encode(registrationRequest.getPassword()))
-				.firstName(registrationRequest.getFirstName()).lastName(registrationRequest.getLastName()).email(registrationRequest.getEmail())
-				.mobile(registrationRequest.getMobile()).roles(registrationRequest.getRoles()).active(true).createdAt(new Date())
+		return User.builder().username(registrationRequest.getUsername())
+				.password(passwordEncoder.encode(registrationRequest.getPassword()))
+				.firstName(registrationRequest.getFirstName()).lastName(registrationRequest.getLastName())
+				.email(registrationRequest.getEmail()).mobile(registrationRequest.getMobile())
+				.roles(registrationRequest.getRoles()).active(true).createdAt(new Date())
 				.modifiedAt(new Date()).build();
 	}
 	

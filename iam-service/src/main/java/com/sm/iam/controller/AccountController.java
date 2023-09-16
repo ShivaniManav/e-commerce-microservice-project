@@ -6,7 +6,6 @@ import com.sm.iam.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-//@CrossOrigin(origins = "http://127.0.0.1:5501",allowedHeaders = "*")
 @RestController
 @RequestMapping("/account")
 public class AccountController {

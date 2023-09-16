@@ -10,7 +10,8 @@ public class DataSourceProps {
 
     private static final String dataSourceLabel = "%s-%s-datasource";
 
-    private static final String resourceUrl = "http://localhost:8888/config-server/%s/dev/%s";
+    //TODO: modify this class to load properties of by app and current profile only.
+    private static final String resourceUrl = "http://localhost:8762/config-server/%s/dev/%s";
 
     private static final Map<String, Map<String, Object>> dataSourceProps = new HashMap<>();
 

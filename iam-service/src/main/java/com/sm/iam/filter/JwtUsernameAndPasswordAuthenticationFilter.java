@@ -2,10 +2,10 @@ package com.sm.iam.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sm.core.exception.SMServiceException;
+import com.sm.core.util.CookieUtil;
 import com.sm.core.util.JWTUtil;
 import com.sm.iam.dto.request.LoginRequest;
 import com.sm.iam.dto.response.AuthenticationResponse;
-import com.sm.iam.utils.CookieUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -22,6 +22,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -62,7 +63,7 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
 		response.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 		response.getOutputStream().write(mapper.writeValueAsBytes(AuthenticationResponse.builder()
 				.status(HttpStatus.OK.getReasonPhrase()).username(authResult.getName()).token(token)
-				.authorities((List<GrantedAuthority>) authResult.getAuthorities()).isAuthenticated(true).build()));
+				.authorities(new HashSet<>((List<GrantedAuthority>) authResult.getAuthorities())).isAuthenticated(true).build()));
 	}
 	
 }

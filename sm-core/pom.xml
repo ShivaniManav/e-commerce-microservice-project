@@ -16,6 +16,8 @@
     <modules>
         <module>sm-service-core</module>
         <module>sm-data</module>
+        <module>sm-messaging</module>
+        <module>sm-security</module>
     </modules>
 
     <dependencyManagement>
@@ -28,6 +30,11 @@
             <dependency>
                 <groupId>com.sm</groupId>
                 <artifactId>sm-data</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sm</groupId>
+                <artifactId>sm-security</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

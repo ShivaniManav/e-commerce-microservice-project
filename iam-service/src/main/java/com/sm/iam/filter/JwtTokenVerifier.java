@@ -1,8 +1,8 @@
 package com.sm.iam.filter;
 
+import com.sm.core.util.CookieUtil;
 import com.sm.core.util.JWTUtil;
 import com.sm.iam.service.TokenService;
-import com.sm.iam.utils.CookieUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;

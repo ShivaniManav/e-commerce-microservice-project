@@ -1,10 +1,10 @@
 package com.sm.iam.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sm.core.util.CookieUtil;
 import com.sm.core.util.JWTUtil;
 import com.sm.iam.dto.response.AuthenticationResponse;
 import com.sm.iam.service.TokenService;
-import com.sm.iam.utils.CookieUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
