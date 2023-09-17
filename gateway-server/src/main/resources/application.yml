@@ -1,0 +1,44 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: "ALWAYS"
+    gateway:
+      enabled: 'true'
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: 'true'
+      routes[2]:
+        uri: http://localhost:8761
+        filters[0]: SetPath=/
+        id: discovery-server
+        predicates[0]: Path=/eureka
+      routes[0]:
+        id: iam-service
+        uri: lb://iam-service
+        predicates[0]: Path=/iam/**
+      routes[3]:
+        id: discovery-server-static
+        predicates[0]: Path=/eureka/**
+        uri: http://localhost:8761
+      routes[1]:
+        id: config-server
+        predicates[0]: Path=/config-server/**
+        uri: lb://config-server
+  application:
+    name: sm-gateway
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,
+            org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+eureka:
+  client:
+    service-url:
+      default-zone: http://localhost:8761/eureka/
+server:
+  port: '8762'

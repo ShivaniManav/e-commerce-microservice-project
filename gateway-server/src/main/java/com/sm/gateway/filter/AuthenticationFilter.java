@@ -7,6 +7,8 @@ import com.sm.core.exception.SMServiceException;
 import com.sm.gateway.dto.AuthenticationResponse;
 import com.sm.gateway.dto.Authority;
 import com.sm.gateway.validator.RouterValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -24,6 +26,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class AuthenticationFilter extends AbstractGatewayFilterFactory<AuthenticationFilter.Config> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationFilter.class);
 
     private static final String JWT_TOKEN = "jwt_token";
 
@@ -86,7 +90,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
             byte[] byteData = mapper.writeValueAsBytes(errorResponse);
             return response.writeWith(Mono.just(byteData).map(dataBufferFactory::wrap));
         } catch (JsonProcessingException e) {
-            //
+            LOGGER.error("Error occurred while creating JWT failure response: ", e);
         }
         return response.setComplete();
     }

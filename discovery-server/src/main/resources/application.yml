@@ -1,0 +1,14 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: "ALWAYS"
+eureka:
+  client:
+    fetch-registry: 'false'
+    register-with-eureka: 'false'
+server:
+  port: '8761'

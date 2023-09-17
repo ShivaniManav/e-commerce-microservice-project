@@ -1,0 +1,49 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: "ALWAYS"
+spring:
+  cloud:
+    config:
+      server:
+        jdbc:
+          order: '1'
+          sql: SELECT PROP_KEY, VALUE from PROPERTIES where APPLICATION=? and PROFILE=?
+            and LABEL=?
+  application:
+    name: config-server
+  datasource:
+    hikari:
+      connection-timeout: '5000'
+      maximum-pool-size: '10'
+    password: Parmar.2000
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: manav
+    url: jdbc:mysql://localhost:3306/sm_config?allowPublicKeyRetrieval=true&useSSL=false
+  profiles:
+    active: jdbc
+  jpa:
+    show-sql: 'true'
+    properties:
+      hibernate:
+        globally_quoted_identifiers_skip_column_definitions: 'true'
+        format_sql: 'true'
+        show_sql: 'true'
+application:
+  version: 1.0-SNAPSHOT
+  title: CONFIG SERVER
+server:
+  port: '8888'
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
+      springframework:
+        jdbc:
+          core:
+            JdbcTemplate: DEBUG
